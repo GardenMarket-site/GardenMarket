@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FluxyGarden - Premium Roblox Marketplace</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+  /* CSS Variables */
+  :root {
+    --primary: #10b981;
+    --primary-dark: #059669;
+    --secondary: #f3f4f6;
+    --accent: #fbbf24;
+    --glass-light: rgba(255, 255, 255, 0.8);
+    --glass-dark: rgba(15, 23, 42, 0.9);
+  }
+
+  /* Base Styles */
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Theme Styles */
+  body:not(.dark) {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%);
+    color: #1f2937;
+  }
+  
+  body.dark {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: #f1f5f9;
+  }
+
+  /* Glass Effect */
+  .glass {
+    background: var(--glass-light);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  body.dark .glass {
+    background: var(--glass-dark);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Card Styles */
+  .card {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  body.dark .card {
+    background: rgba(30, 41, 59, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Animations */
+  .simple-hover {
+    transition: transform 0.2s ease;
+  }
+  
+  .simple-hover:hover {
+    transform: scale(1.05);
+  }
+
+  .cart-bounce {
+    animation: cartBounce 0.3s ease;
+  }
+  
+  @keyframes cartBounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+
+  /* Gradient Text */
+  .gradient-text {
+    background: linear-gradient(45deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Rarity Colors - FIXED: positioned to not overlap price */
+  .rarity-common { border-left: 4px solid #6b7280; }
+  .rarity-uncommon { border-left: 4px solid #10b981; }
+  .rarity-rare { border-left: 4px solid #3b82f6; }
+  .rarity-epic { border-left: 4px solid #8b5cf6; }
+  .rarity-legendary { border-left: 4px solid #f59e0b; }
+
+  /* Loading Animation */
+  .loading {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Notification Styles */
+  .notification {
+    animation: slideIn 0.3s ease-out;
+  }
+  
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* Chat Styles - FIXED: Better positioning and visibility */
+  #chat-modal {
+    backdrop-filter: blur(20px);
+    transition: all 0.3s ease;
+    bottom: 20px;
+    right: 20px;
+    height: 500px;
+  }
+  
+  #chat-messages {
+    max-height: 300px;
+    min-height: 300px;
+  }
+  
+  #floating-chat {
+    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
+    transition: all 0.2s ease;
+  }
+  
+  #floating-chat:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 40px rgba(16, 185, 129, 0.4);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 10px;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .card:hover {
+      transform: none;
+      box-shadow: none;
+    }
+    
+    #chat-modal {
+      width: calc(100vw - 20px);
+      height: 400px;
+      right: 10px;
+      bottom: 10px;
+    }
+  }
+
+  /* Performance Optimization */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- Header -->
+<header class="glass sticky top-0 z-40 shadow-lg">
+  <div class="max-w-7xl mx-auto px-6 py-4">
+    <div class="flex items-center justify-between">
+      <!-- Logo -->
+      <div class="flex items-center gap-4">
+        <div class="relative">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center text-white font-bold shadow-lg">
+            <i class="fas fa-seedling"></i>
+          </div>
+          <div class="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
+        </div>
+        <div>
+          <div class="text-xl font-bold gradient-text">Garden Market</div>
+          <div class="text-sm opacity-70">Premium Roblox Marketplace</div>
+        </div>
+      </div>
+
+      <!-- Search & Controls -->
+      <div class="flex items-center gap-4">
+        <div class="relative">
+          <input 
+            id="search" 
+            type="text" 
+            placeholder="Search premium items..." 
+            class="w-64 md:w-80 pl-10 pr-4 py-2 rounded-xl glass border-2 border-transparent focus:border-green-400 transition-colors duration-200 placeholder-gray-400"
+          />
+          <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+        </div>
+        
+        <button id="theme-toggle" class="p-2 rounded-xl glass simple-hover">
+          <i class="fas fa-moon text-lg" id="theme-icon"></i>
+        </button>
+        
+        <button class="p-2 rounded-xl glass simple-hover">
+          <i class="fas fa-user text-lg"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="max-w-7xl mx-auto px-6 mt-6 flex flex-col lg:flex-row gap-8">
+  
+  <!-- Products Section -->
+  <div class="flex-1">
+    <!-- Category Filters -->
+    <div class="mb-6">
+      <h3 class="text-lg font-semibold mb-4 gradient-text">Browse Categories</h3>
+      <div class="flex flex-wrap gap-3" id="filters"></div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div class="glass rounded-xl p-4 text-center">
+        <div class="text-2xl font-bold gradient-text" id="total-items">0</div>
+        <div class="text-sm opacity-70">Total Items</div>
+      </div>
+      <div class="glass rounded-xl p-4 text-center">
+        <div class="text-2xl font-bold gradient-text">24</div>
+        <div class="text-sm opacity-70">Active Sales</div>
+      </div>
+      <div class="glass rounded-xl p-4 text-center">
+        <div class="text-2xl font-bold gradient-text">4.9⭐</div>
+        <div class="text-sm opacity-70">Customer Rating</div>
+      </div>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="grid"></div>
+    
+    <!-- Load More Button -->
+    <div class="text-center mt-8">
+      <button class="px-8 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold shadow-lg simple-hover">
+        <i class="fas fa-plus mr-2"></i>Load More Items
+      </button>
+    </div>
+  </div>
+
+  <!-- Shopping Cart Sidebar -->
+  <aside class="w-full lg:w-80">
+    <div class="glass rounded-2xl p-6 shadow-xl sticky top-24">
+      <!-- Cart Header -->
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold gradient-text">Shopping Cart</h2>
+        <div class="relative">
+          <i class="fas fa-shopping-cart text-xl text-green-500"></i>
+          <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">0</span>
+        </div>
+      </div>
+
+      <!-- Cart Items -->
+      <div id="cart-items" class="space-y-3 max-h-60 overflow-y-auto mb-4">
+        <div class="text-center py-8 opacity-50">
+          <i class="fas fa-shopping-bag text-3xl mb-2"></i>
+          <div>Your cart is empty</div>
+          <div class="text-xs mt-1 opacity-70">Add items to get started</div>
+        </div>
+      </div>
+
+      <!-- Cart Summary -->
+      <div class="border-t border-white/20 pt-4 space-y-2">
+        <div class="flex justify-between">
+          <span>Subtotal:</span>
+          <span id="subtotal" class="font-semibold">💎 0</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Discount:</span>
+          <span id="discount" class="text-green-500 font-semibold">💎 0</span>
+        </div>
+        <div class="flex justify-between text-lg font-bold border-t border-white/20 pt-2">
+          <span>Total:</span>
+          <span id="total-price" class="gradient-text">💎 0</span>
+        </div>
+      </div>
+
+      <!-- Checkout Button -->
+      <button id="checkout" class="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold shadow-lg simple-hover disabled:opacity-50 disabled:cursor-not-allowed">
+        <i class="fas fa-credit-card mr-2"></i>Proceed to Checkout
+      </button>
+
+      <!-- Security Badge -->
+      <div class="text-center mt-3 text-xs opacity-70">
+        <i class="fas fa-shield-alt text-green-500 mr-1"></i>
+        Secure SSL Encrypted Payment
+      </div>
+    </div>
+  </aside>
+</main>
+
+<!-- Purchase Confirmation Modal -->
+<div id="modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+  <div class="glass rounded-2xl p-6 w-96 shadow-2xl">
+    <div class="text-center mb-4">
+      <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full mx-auto mb-3 flex items-center justify-center">
+        <i class="fas fa-shopping-cart text-white"></i>
+      </div>
+      <h2 class="text-xl font-bold gradient-text">Confirm Purchase</h2>
+    </div>
+    
+    <div id="modal-content" class="text-center mb-6"></div>
+    
+    <div class="flex gap-3">
+      <button id="cancel" class="flex-1 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+        Cancel
+      </button>
+      <button id="confirm" class="flex-1 py-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold simple-hover">
+        <span class="confirm-text">Confirm Purchase</span>
+        <div class="loading hidden ml-2"></div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Chat Bot Modal - FIXED: Better positioning and height -->
+<div id="chat-modal" class="fixed w-80 glass rounded-2xl shadow-2xl z-50 hidden flex-col">
+  <!-- Chat Header -->
+  <div class="flex items-center justify-between p-4 border-b border-white/20">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center">
+        <i class="fas fa-robot text-white text-sm"></i>
+      </div>
+      <div>
+        <div class="font-semibold text-sm">Garden Support</div>
+        <div class="text-xs opacity-70 flex items-center gap-1">
+          <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+          Online
+        </div>
+      </div>
+    </div>
+    <button id="close-chat" class="text-gray-400 hover:text-gray-600 transition-colors">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  
+  <!-- Chat Messages - FIXED: Better height and scrolling -->
+  <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-3">
+    <div class="flex items-start gap-2">
+      <div class="w-6 h-6 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-robot text-white text-xs"></i>
+      </div>
+      <div class="glass rounded-lg p-3 max-w-[200px]">
+        <div class="text-sm">👋 Hello! Im the Garden Market support bot. How can I help?</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Chat Options -->
+  <div id="chat-options" class="p-4 border-t border-white/20 space-y-2">
+    <button onclick="handleChatOption('purchased')" class="w-full p-3 text-left rounded-lg glass hover:bg-white/10 transition-colors text-sm">
+      🛒 I bought an item, what next?
+    </button>
+    <button onclick="handleChatOption('help')" class="w-full p-3 text-left rounded-lg glass hover:bg-white/10 transition-colors text-sm">
+      ❓ Need help with order
+    </button>
+    <button onclick="handleChatOption('problem')" class="w-full p-3 text-left rounded-lg glass hover:bg-white/10 transition-colors text-sm">
+      ⚠️ Problem with item
+    </button>
+  </div>
+</div>
+
+<!-- Floating Chat Button -->
+<button id="floating-chat" class="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full shadow-2xl flex items-center justify-center text-white z-40">
+  <i class="fas fa-comments text-xl"></i>
+  <div class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
+</button>
+
+<!-- Notifications Container -->
+<div id="notifications" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+<!-- Success Animation Overlay -->
+<div id="success-overlay" class="fixed inset-0 pointer-events-none z-40 hidden">
+  <div class="absolute inset-0 bg-green-500/20 animate-pulse"></div>
+  <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+    <div class="w-32 h-32 glass rounded-full shadow-2xl flex items-center justify-center">
+      <i class="fas fa-check text-green-500 text-5xl"></i>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===============================================
+// PRODUCT CATALOG
+// ===============================================
+const catalog = {
+  "💰 Currency": [
+    { 
+      name: '20SX Sheckles', 
+      price: 600, 
+      icon: '💰', 
+      rarity: 'common', 
+      description: '20SX Sheckles' 
+    },
+    { 
+      name: '100SX Sheckles', 
+      price: 1000, 
+      icon: '💎', 
+      rarity: 'rare', 
+      description: '100SX Sheckles' 
+    },
+    { 
+      name: '50SX Sheckles', 
+      price: 4500, 
+      icon: '💎✨', 
+      rarity: 'epic', 
+      description: '50Sx Sheckles' 
+    }
+  ],
+  "🐾 Pets": [
+    { 
+      name: 'Raccoon', 
+      price: 700, 
+      icon: '🦝', 
+      rarity: 'common', 
+      description: 'Go to random player on server and stole they fruit' 
+    },
+    { 
+      name: 'Butterfly', 
+      price: 550, 
+      icon: '🦋', 
+      rarity: 'common', 
+      description: 'Go to random fruit and give to it rainbow mutation' 
+    },
+    { 
+      name: 'Red Fox', 
+      price: 300, 
+      icon: '🦊', 
+      rarity: 'common', 
+      description: 'go to random player on server and stole they seed' 
+    },
+    { 
+      name: 'Queen Bee', 
+      price: 500, 
+      icon: '🐝', 
+      rarity: 'uncommon', 
+      description: 'Go to random fruit and give to it Pollinated mutation ' 
+    },
+    { 
+      name: 'Disco Bee', 
+      price: 1300, 
+      icon: '🐝✨', 
+      rarity: 'legendary', 
+      description: 'Go to random fruit and give to it rainbow mutation' 
+    },
+    { 
+      name: 'Red Panda', 
+      price: 200, 
+      icon: '🐼', 
+      rarity: 'common', 
+      description: 'Go to random shop and restocking it ' 
+    }
+  ],
+  "🏡 Accounts": [
+    { 
+      name: 'Starter Garden Pack', 
+      price: 500, 
+      icon: '🌱', 
+      rarity: 'common', 
+      description: '10x elder strawberry seed, 1 TRex, 1QA In account' 
+    },
+    { 
+      name: 'Candy Blossom Bundle (5x)', 
+      price: 2000, 
+      icon: '🪴', 
+      rarity: 'rare', 
+      description: '5 candy blossom seeds' 
+    },
+    { 
+      name: 'Mega Candy Bundle (10x)', 
+      price: 3000, 
+      icon: '🍭', 
+      rarity: 'epic', 
+      description: '10X Candy blossom (5x tree, and a 5x seeds)' 
+    },
+    { 
+      name: 'Boon Blossom Collection', 
+      price: 1000, 
+      icon: '🦴', 
+      rarity: 'uncommon', 
+      description: 'Boon Blossom X5 seeds' 
+    },
+    { 
+      name: 'Mystery Premium Account', 
+      price: 800, 
+      icon: '❓', 
+      rarity: 'rare', 
+      description: 'Random high-value account with surprises, rare items, and premium features' 
+    }
+  ]
+};
+
+// ===============================================
+// DOM ELEMENTS
+// ===============================================
+const elements = {
+  grid: document.getElementById('grid'),
+  filters: document.getElementById('filters'),
+  search: document.getElementById('search'),
+  themeToggle: document.getElementById('theme-toggle'),
+  themeIcon: document.getElementById('theme-icon'),
+  cartItems: document.getElementById('cart-items'),
+  cartCount: document.getElementById('cart-count'),
+  subtotal: document.getElementById('subtotal'),
+  discount: document.getElementById('discount'),
+  totalPrice: document.getElementById('total-price'),
+  checkout: document.getElementById('checkout'),
+  modal: document.getElementById('modal'),
+  modalContent: document.getElementById('modal-content'),
+  cancel: document.getElementById('cancel'),
+  confirm: document.getElementById('confirm'),
+  totalItems: document.getElementById('total-items'),
+  notifications: document.getElementById('notifications'),
+  floatingChat: document.getElementById('floating-chat'),
+  chatModal: document.getElementById('chat-modal'),
+  closeChat: document.getElementById('close-chat'),
+  chatMessages: document.getElementById('chat-messages'),
+  chatOptions: document.getElementById('chat-options'),
+  successOverlay: document.getElementById('success-overlay')
+};
+
+// ===============================================
+// APPLICATION STATE
+// ===============================================
+let currentCategory = 'All';
+let cart = JSON.parse(localStorage.getItem('gardenMarketCart')) || [];
+let isDarkMode = localStorage.getItem('gardenMarketTheme') === 'dark';
+let selectedItem = null;
+
+// ===============================================
+// UTILITY FUNCTIONS
+// ===============================================
+function debounce(func, wait) {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+}
+
+function showNotification(message, type = 'success') {
+  const notification = document.createElement('div');
+  notification.className = `notification glass rounded-lg p-3 shadow-lg max-w-sm ${
+    type === 'success' ? 'border-l-4 border-green-500' : 'border-l-4 border-red-500'
+  }`;
+  notification.innerHTML = `
+    <div class="flex items-center gap-2 text-sm">
+      <i class="fas fa-${type === 'success' ? 'check-circle text-green-500' : 'exclamation-circle text-red-500'}"></i>
+      <span class="flex-1">${message}</span>
+      <button onclick="this.parentElement.parentElement.remove()" class="text-xs opacity-70 hover:opacity-100 ml-2">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  `;
+  
+  elements.notifications.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.style.animation = 'slideIn 0.3s ease-out reverse';
+    setTimeout(() => notification.remove(), 300);
+  }, 4000);
+}
+
+function showSuccessAnimation() {
+  elements.successOverlay.classList.remove('hidden');
+  setTimeout(() => {
+    elements.successOverlay.classList.add('hidden');
+  }, 2000);
+}
+
+// ===============================================
+// THEME MANAGEMENT
+// ===============================================
+function toggleTheme() {
+  isDarkMode = !isDarkMode;
+  localStorage.setItem('gardenMarketTheme', isDarkMode ? 'dark' : 'light');
+  updateTheme();
+}
+
+function updateTheme() {
+  document.body.classList.toggle('dark', isDarkMode);
+  elements.themeIcon.className = `fas fa-${isDarkMode ? 'sun' : 'moon'} text-lg`;
+}
+
+// ===============================================
+// FILTER MANAGEMENT
+// ===============================================
+function renderFilters() {
+  const categories = ['All', ...Object.keys(catalog)];
+  elements.filters.innerHTML = categories.map(category => `
+    <button onclick="setCategory('${category}')" class="px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+      category === currentCategory 
+        ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg' 
+        : 'glass simple-hover'
+    }">
+      ${category}
+    </button>
+  `).join('');
+}
+
+function setCategory(category) {
+  currentCategory = category;
+  renderFilters();
+  renderGrid();
+}
+
+// ===============================================
+// PRODUCT GRID - FIXED: Rarity badge positioning
+// ===============================================
+function renderGrid() {
+  const query = elements.search.value.toLowerCase();
+  const items = currentCategory === 'All' 
+    ? Object.values(catalog).flat() 
+    : catalog[currentCategory] || [];
+  
+  const filteredItems = items.filter(item => 
+    item.name.toLowerCase().includes(query) || 
+    item.description.toLowerCase().includes(query)
+  );
+
+  if (filteredItems.length === 0) {
+    elements.grid.innerHTML = `
+      <div class="col-span-full text-center py-16">
+        <i class="fas fa-search text-6xl opacity-20 mb-4"></i>
+        <div class="text-xl opacity-50 mb-2">No items found</div>
+        <div class="text-sm opacity-30">Try adjusting your search terms or browse different categories</div>
+      </div>
+    `;
+    return;
+  }
+
+  elements.grid.innerHTML = filteredItems.map(item => `
+    <div class="card rounded-xl p-5 rarity-${item.rarity} relative overflow-hidden">
+      <!-- Item Header with proper positioning -->
+      <div class="flex items-start justify-between mb-4">
+        <div class="text-4xl">${item.icon}</div>
+        <div class="text-right">
+          <div class="text-xl font-bold gradient-text mb-2">💎 ${item.price.toLocaleString()}</div>
+          <!-- Rarity Badge - FIXED: positioned below price -->
+          <div class="px-2 py-1 rounded-full text-xs font-bold uppercase ${getRarityBadgeColor(item.rarity)} text-white">
+            ${item.rarity}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Item Details -->
+      <h3 class="text-lg font-semibold mb-2">${item.name}</h3>
+      <p class="text-sm opacity-70 mb-4 leading-relaxed">${item.description}</p>
+      
+      <!-- Action Buttons -->
+      <div class="flex gap-2">
+        <button onclick="addToCart(${JSON.stringify(item).replace(/"/g, '&quot;')}, this)" 
+                class="flex-1 py-2 px-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white font-medium simple-hover text-sm">
+          <i class="fas fa-cart-plus mr-1"></i>Add to Cart
+        </button>
+        <button onclick="showItemDetails(${JSON.stringify(item).replace(/"/g, '&quot;')})" 
+                class="p-2 rounded-lg glass simple-hover">
+          <i class="fas fa-info text-sm"></i>
+        </button>
+      </div>
+    </div>
+  `).join('');
+  
+  updateStats();
+}
+
+function getRarityBadgeColor(rarity) {
+  const colors = {
+    common: 'bg-gray-500',
+    uncommon: 'bg-green-500',
+    rare: 'bg-blue-500',
+    epic: 'bg-purple-500',
+    legendary: 'bg-yellow-500'
+  };
+  return colors[rarity] || colors.common;
+}
+
+function updateStats() {
+  const totalItems = Object.values(catalog).flat().length;
+  elements.totalItems.textContent = totalItems;
+}
+
+// ===============================================
+// CART MANAGEMENT
+// ===============================================
+function addToCart(item, button) {
+  // Button feedback animation
+  button.style.transform = 'scale(0.95)';
+  setTimeout(() => {
+    button.style.transform = '';
+  }, 150);
+
+  // Add to cart logic
+  const existingItem = cart.find(cartItem => cartItem.name === item.name);
+  if (existingItem) {
+    existingItem.quantity += 1;
+  } else {
+    cart.push({ ...item, quantity: 1, id: Date.now() });
+  }
+
+  saveCart();
+  renderCart();
+  showNotification(`${item.name} added to cart! 🎉`);
+  
+  // Cart animation
+  const cartEl = document.querySelector('aside');
+  cartEl.classList.add('cart-bounce');
+  setTimeout(() => cartEl.classList.remove('cart-bounce'), 300);
+}
+
+function removeFromCart(itemId) {
+  cart = cart.filter(item => item.id !== itemId);
+  saveCart();
+  renderCart();
+  showNotification('Item removed from cart', 'error');
+}
+
+function updateQuantity(itemId, newQuantity) {
+  if (newQuantity <= 0) {
+    removeFromCart(itemId);
+    return;
+  }
+  
+  const item = cart.find(item => item.id === itemId);
+  if (item) {
+    item.quantity = newQuantity;
+    saveCart();
+    renderCart();
+  }
+}
+
+function renderCart() {
+  if (cart.length === 0) {
+    elements.cartItems.innerHTML = `
+      <div class="text-center py-8 opacity-50">
+        <i class="fas fa-shopping-bag text-3xl mb-2"></i>
+        <div class="font-medium">Your cart is empty</div>
+        <div class="text-xs mt-1 opacity-70">Browse our premium items to get started</div>
+      </div>
+    `;
+  } else {
+    elements.cartItems.innerHTML = cart.map(item => `
+      <div class="glass rounded-lg p-3 border border-white/10">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="text-lg">${item.icon}</div>
+          <div class="flex-1 min-w-0">
+            <div class="font-medium text-sm truncate">${item.name}</div>
+            <div class="text-xs opacity-70">💎 ${item.price.toLocaleString()} each</div>
+          </div>
+          <button onclick="removeFromCart(${item.id})" class="text-red-500 hover:text-red-700 transition-colors p-1">
+            <i class="fas fa-times text-xs"></i>
+          </button>
+        </div>
+        
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <button onclick="updateQuantity(${item.id}, ${item.quantity - 1})" 
+                    class="w-6 h-6 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs simple-hover">
+              <i class="fas fa-minus"></i>
+            </button>
+            <span class="w-8 text-center text-sm font-medium">${item.quantity}</span>
+            <button onclick="updateQuantity(${item.id}, ${item.quantity + 1})" 
+                    class="w-6 h-6 rounded bg-green-500 text-white flex items-center justify-center text-xs simple-hover">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+          <div class="font-semibold text-sm">💎 ${(item.price * item.quantity).toLocaleString()}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Update totals
+  const subtotalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const discountAmount = subtotalAmount > 5000 ? Math.floor(subtotalAmount * 0.1) : 0;
+  const totalAmount = subtotalAmount - discountAmount;
+
+  elements.cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+  elements.subtotal.textContent = `💎 ${subtotalAmount.toLocaleString()}`;
+  elements.discount.textContent = discountAmount > 0 ? `-💎 ${discountAmount.toLocaleString()}` : `💎 0`;
+  elements.totalPrice.textContent = `💎 ${totalAmount.toLocaleString()}`;
+  
+  elements.checkout.disabled = cart.length === 0;
+}
+
+function saveCart() {
+  localStorage.setItem('gardenMarketCart', JSON.stringify(cart));
+}
+
+// ===============================================
+// MODAL MANAGEMENT
+// ===============================================
+function showItemDetails(item) {
+  elements.modalContent.innerHTML = `
+    <div class="text-center">
+      <div class="text-5xl mb-4">${item.icon}</div>
+      <h3 class="text-xl font-bold mb-2">${item.name}</h3>
+      <div class="inline-block px-3 py-1 rounded-full ${getRarityBadgeColor(item.rarity)} text-white text-sm font-medium mb-4 uppercase">
+        ${item.rarity}
+      </div>
+      <p class="text-sm mb-4 opacity-80 leading-relaxed">${item.description}</p>
+      <div class="text-2xl font-bold gradient-text">💎 ${item.price.toLocaleString()}</div>
+    </div>
+  `;
+  
+  selectedItem = item;
+  elements.modal.classList.remove('hidden');
+}
+
+function handleCheckout() {
+  if (cart.length === 0) return;
+  
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const subtotalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const discountAmount = subtotalAmount > 5000 ? Math.floor(subtotalAmount * 0.1) : 0;
+  const totalAmount = subtotalAmount - discountAmount;
+  
+  elements.modalContent.innerHTML = `
+    <div class="text-center">
+      <h3 class="text-xl font-bold mb-4">Confirm Your Order</h3>
+      <div class="space-y-3 mb-6">
+        <div class="flex justify-between items-center">
+          <span>Items:</span>
+          <span class="font-semibold">${totalItems}</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span>Subtotal:</span>
+          <span class="font-semibold">💎 ${subtotalAmount.toLocaleString()}</span>
+        </div>
+        ${discountAmount > 0 ? `
+        <div class="flex justify-between items-center text-green-600">
+          <span>Discount (10%):</span>
+          <span class="font-semibold">-💎 ${discountAmount.toLocaleString()}</span>
+        </div>
+        ` : ''}
+        <div class="flex justify-between items-center text-lg font-bold border-t pt-3">
+          <span>Total:</span>
+          <span class="gradient-text">💎 ${totalAmount.toLocaleString()}</span>
+        </div>
+      </div>
+      <div class="text-xs opacity-70 bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
+        🔒 Items will be delivered instantly to your Roblox account after payment confirmation
+      </div>
+    </div>
+  `;
+  
+  elements.modal.classList.remove('hidden');
+}
+
+function closeModal() {
+  elements.modal.classList.add('hidden');
+  selectedItem = null;
+}
+
+function handleConfirmPurchase() {
+  const confirmBtn = elements.confirm;
+  const confirmText = confirmBtn.querySelector('.confirm-text');
+  const loading = confirmBtn.querySelector('.loading');
+  
+  // Show loading state
+  confirmText.textContent = 'Processing...';
+  loading.classList.remove('hidden');
+  confirmBtn.disabled = true;
+  
+  // Simulate purchase process
+  setTimeout(() => {
+    closeModal();
+    showSuccessAnimation();
+    
+    if (selectedItem) {
+      // Single item purchase from modal
+      addToCart(selectedItem);
+      selectedItem = null;
+    } else {
+      // Full cart checkout
+      showNotification('🎉 Purchase completed successfully! Check chat for delivery instructions.');
+      cart = [];
+      saveCart();
+      renderCart();
+    }
+    
+    // Reset button state
+    confirmText.textContent = 'Confirm Purchase';
+    loading.classList.add('hidden');
+    confirmBtn.disabled = false;
+  }, 2000);
+}
+
+// ===============================================
+// CHAT BOT FUNCTIONS - FIXED: Better visibility
+// ===============================================
+function toggleChat() {
+  const isHidden = elements.chatModal.classList.contains('hidden');
+  if (isHidden) {
+    elements.chatModal.classList.remove('hidden');
+    elements.floatingChat.style.display = 'none';
+  } else {
+    closeChat();
+  }
+}
+
+function closeChat() {
+  elements.chatModal.classList.add('hidden');
+  elements.floatingChat.style.display = 'flex';
+}
+
+function addBotMessage(message) {
+  const messageDiv = document.createElement('div');
+  messageDiv.className = 'flex items-start gap-2 opacity-0';
+  messageDiv.innerHTML = `
+    <div class="w-6 h-6 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center flex-shrink-0">
+      <i class="fas fa-robot text-white text-xs"></i>
+    </div>
+    <div class="glass rounded-lg p-3 max-w-[200px]">
+      <div class="text-sm">${message}</div>
+    </div>
+  `;
+  
+  elements.chatMessages.appendChild(messageDiv);
+  
+  // Animate in
+  setTimeout(() => {
+    messageDiv.style.opacity = '1';
+    messageDiv.style.transition = 'opacity 0.3s ease';
+  }, 100);
+  
+  elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+}
+
+function addUserMessage(message) {
+  const messageDiv = document.createElement('div');
+  messageDiv.className = 'flex items-start gap-2 justify-end opacity-0';
+  messageDiv.innerHTML = `
+    <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg p-3 max-w-[200px]">
+      <div class="text-sm text-white">${message}</div>
+    </div>
+    <div class="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center flex-shrink-0">
+      <i class="fas fa-user text-white text-xs"></i>
+    </div>
+  `;
+  
+  elements.chatMessages.appendChild(messageDiv);
+  
+  // Animate in
+  setTimeout(() => {
+    messageDiv.style.opacity = '1';
+    messageDiv.style.transition = 'opacity 0.3s ease';
+  }, 100);
+  
+  elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+}
+
+function handleChatOption(option) {
+  switch(option) {
+    case 'purchased':
+      addUserMessage('I bought an item, what next?');
+      setTimeout(() => {
+        addBotMessage('🎉 Great! After successful item purchase, follow these steps:');
+        setTimeout(() => {
+          addBotMessage('1️⃣ go to link https://www.roblox.com/games/82278746977690/Slap-Troll-Tower-BIG-UPDATE#!/store (copy the link)"');
+          setTimeout(() => {
+            addBotMessage('2️⃣ buy ur gamepass');
+            setTimeout(() => {
+              addBotMessage('3️⃣ send request to the friends to the player "xdwddll10"!');
+              setTimeout(() => {
+                addBotMessage('💡 join to they');
+                setTimeout(() => {
+                  showNewChatOptions(['back', 'more-help']);
+                }, 1000);
+              }, 1500);
+            }, 1500);
+          }, 1500);
+        }, 1000);
+      }, 500);
+      break;
+      
+    case 'help':
+      addUserMessage('Need help with order');
+      setTimeout(() => {
+        addBotMessage('Of course Ill help! 😊 Choose what exactly you need help with:');
+        setTimeout(() => {
+          showNewChatOptions(['cant-find', 'wrong-item', 'payment-issues', 'back']);
+        }, 1000);
+      }, 500);
+      break;
+      
+    case 'problem':
+      addUserMessage('Problem with item');
+      setTimeout(() => {
+        addBotMessage('😔 Sorry for the inconvenience! Describe what happened:');
+        setTimeout(() => {
+          showNewChatOptions(['not-received', 'wrong-delivery', 'technical-issue', 'contact-support', 'back']);
+        }, 1000);
+      }, 500);
+      break;
+      
+    case 'cant-find':
+      addUserMessage('Cant find the player');
+      setTimeout(() => {
+        addBotMessage('Check the correctness of the username: "xdwddll10" (without quotes and spaces)');
+        setTimeout(() => {
+          addBotMessage('If still not found:');
+          setTimeout(() => {
+            addBotMessage('• Try in 10-15 minutes<br>• Make sure your friend requests are open<br>• Check server region');
+            setTimeout(() => {
+              showNewChatOptions(['still-cant-find', 'back']);
+            }, 1000);
+          }, 1500);
+        }, 1500);
+      }, 500);
+      break;
+      
+    case 'not-received':
+      addUserMessage('Did not receive the item');
+      setTimeout(() => {
+        addBotMessage('Lets check all steps:');
+        setTimeout(() => {
+          addBotMessage('✅ go to profile to "xdwddll10"?<br>✅ click a "Creations" <br>✅ Then "Store" <br>✅ and buy ur gamepass, or u can find it in link: https://www.roblox.com/games/82278746977690/Slap-Troll-Tower-BIG-UPDATE#!/store ');
+          setTimeout(() => {
+            showNewChatOptions(['yes-all-done', 'missing-step', 'contact-support', 'back']);
+          }, 1500);
+        }, 1000);
+      }, 500);
+      break;
+      
+    case 'contact-support':
+      addUserMessage('Contact support');
+      setTimeout(() => {
+        addBotMessage('📧 Write to us at: dascrat@Gmail.com');
+        setTimeout(() => {
+          addBotMessage('🔗 Or in Discord: razor0v');
+          setTimeout(() => {
+            addBotMessage('⏰ Usually respond within 2-4 hours');
+            setTimeout(() => {
+              showNewChatOptions(['back']);
+            }, 1000);
+          }, 1000);
+        }, 1000);
+      }, 500);
+      break;
+      
+    case 'payment-issues':
+      addUserMessage('Payment problems');
+      setTimeout(() => {
+        addBotMessage('What exactly is the payment problem?');
+        setTimeout(() => {
+          showNewChatOptions(['payment-failed', 'wrong-amount', 'refund-request', 'back']);
+        }, 1000);
+      }, 500);
+      break;
+      
+    case 'payment-failed':
+      addUserMessage('Payment failed');
+      setTimeout(() => {
+        addBotMessage('Check:');
+        setTimeout(() => {
+          addBotMessage('• Enough funds on card/account<br>• Correctness of entered data<br>• Card not blocked for online payments');
+          setTimeout(() => {
+            addBotMessage('If the problem is not solved - contact support');
+          }, 1500);
+        }, 1000);
+      }, 500);
+      break;
+      
+    case 'back':
+      resetChatOptions();
+      break;
+      
+    case 'more-help':
+      addUserMessage('i have more questions');
+      setTimeout(() => {
+        addBotMessage('sure! can i help');
+        setTimeout(() => {
+          resetChatOptions();
+        }, 1000);
+      }, 500);
+      break;
+  }
+}
+
+function showNewChatOptions(options) {
+  const optionButtons = {
+    'back': '⬅️ back to menu',
+    'more-help': '❓ more questions',
+    'cant-find': '🔍 i cant find a player',
+    'wrong-item': '📦 i got a wrong item',
+    'payment-issues': '💳 payment issues',
+    'not-received': '❌ not received item',
+    'wrong-delivery': '🚚 wrong delivery',
+    'yes-all-done': '✅ all done',
+    'wrong-amount': '💰 wrong amout',
+    'refund-request': '↩️ i wanna refund money'
+  };
+  
+  elements.chatOptions.innerHTML = options.map(option => `
+    <button onclick="handleChatOption('${option}')" class="w-full p-3 text-left rounded-lg glass hover:bg-white/10 transition-colors text-sm">
+      ${optionButtons[option]}
+    </button>
+  `).join('');
+}
+
+function resetChatOptions() {
+  elements.chatOptions.innerHTML = `
+    <button onclick="handleChatOption('purchased')" class="w-full p-3 text-left rounded-lg glass hover:bg-white/10 transition-colors text-sm">
+      🛒 I bought an item, what next?
+    </button>
+    <button onclick="handleChatOption('help')" class="w-full p-3 text-left rounded-lg glass hover:bg-white/10 transition-colors text-sm">
+      ❓ Need help with order
+    </button>
+    <button onclick="handleChatOption('problem')" class="w-full p-3 text-left rounded-lg glass hover:bg-white/10 transition-colors text-sm">
+      ⚠️ Problem with item
+    </button>
+  `;
+}
+
+// ===============================================
+// EVENT HANDLERS & INITIALIZATION
+// ===============================================
+function init() {
+  updateTheme();
+  renderFilters();
+  renderGrid();
+  renderCart();
+  updateStats();
+  
+  // Event Listeners
+  elements.search.addEventListener('input', debounce(renderGrid, 300));
+  elements.themeToggle.addEventListener('click', toggleTheme);
+  elements.checkout.addEventListener('click', handleCheckout);
+  elements.cancel.addEventListener('click', closeModal);
+  elements.confirm.addEventListener('click', handleConfirmPurchase);
+  
+  // Chat Events
+  elements.floatingChat.addEventListener('click', toggleChat);
+  elements.closeChat.addEventListener('click', closeChat);
+  
+  // Keyboard Shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !elements.modal.classList.contains('hidden')) {
+      closeModal();
+    }
+    if (e.key === 'Escape' && !elements.chatModal.classList.contains('hidden')) {
+      closeChat();
+    }
+    if (e.ctrlKey && e.key === '/') {
+      e.preventDefault();
+      elements.search.focus();
+    }
+  });
+  
+  // Auto-save cart periodically
+  setInterval(saveCart, 30000);
+}
+
+// ===============================================
+// STARTUP
+// ===============================================
+document.addEventListener('DOMContentLoaded', init);
+console.log('🌱 Garden Market - Premium Edition Loaded Successfully! 🚀');
+</script>
+
+</body>
+</html>
